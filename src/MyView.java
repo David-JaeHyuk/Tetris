@@ -10,12 +10,20 @@ class MyView extends Frame implements KeyListener
 {
 	Image buffer;
 	Graphics bufferG;
+	Board board;
+	int size = 10;
+	int startX = 50, startY = 50;
 	
+	WinEvent w = new WinEvent();
 	public MyView()
 	{
-		super("MyView");
-	    MediaTracker tracker = new MediaTracker(this);
+		super("MyTetris");
+		board = new Board();
+//	    MediaTracker tracker = new MediaTracker(this);
+		setBounds(50, 50, 300, 500);
 	    addKeyListener(this);
+	    setVisible(true);
+	    addWindowListener(w);
 	}
 	
 	@Override
@@ -49,14 +57,22 @@ class MyView extends Frame implements KeyListener
 	
 	private void drawBuffer()
 	{
+		int x, y;
+		
 		buffer = createImage(getSize().width, getSize().height);
 		bufferG = buffer.getGraphics();
-
+		
 		/* 여기다 테트리스 관련 작업 그리기 */
+		
 		bufferG.setColor(Color.BLACK);
-		bufferG.fillRect(10, 10, 30, 30);
-		bufferG.drawLine(40, 40, 80, 80);
-//		bufferG.drawImage(img, 30, 30, this);
+		
+		for(int i = 0; i < Board.row; i++) // 위에서 아래로 그린다.
+			for(int j = 0; j < Board.col; j++) // 좌에서 우로 그린다.
+			{
+				x = startX + j*size; // 시작점의 x좌표 계속 업데이트
+				y = startY + i*size; // 시작점의 y좌표 계속 업데이트
+				bufferG.fillRect(x, y, size, size);
+			}		
 	}
 	
 	@Override

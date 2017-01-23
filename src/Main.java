@@ -7,8 +7,6 @@ public class Main
 
 		MyView view = new MyView();
 		
-		view.setSize(300, 300);
-		view.setVisible(true);
 	}
 
 }
