@@ -1,12 +1,12 @@
 
 public class Main 
 {
-	public static MyView view;
+	public static TetrisView view;
 	public static void main(String[] args) 
 	{
 		// TODO Auto-generated method stub
 
-		view = new MyView();
+		view = new TetrisView();
 		
 	}
 
