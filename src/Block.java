@@ -27,7 +27,7 @@ public class Block
 	
 	void initBlock(int type)
 	{
-		absolute = new Point(Board.col/2, 0); // 절대위치의 초기 위치
+		absolute = new Point(Board.col/2, 0); // 초기 위치
 		
 		this.type = type;
 		switch(type)
