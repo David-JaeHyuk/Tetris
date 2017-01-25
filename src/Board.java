@@ -5,13 +5,18 @@ import java.awt.event.KeyEvent;
 public class Board
 { 	
 	// 보드의 세로길이
-	static int row = 20;
+	static int row = 22;
 	
 	// 보드의 가로길이
-	static int col= 10;
+	static int col= 12;
 	Color[][] gameBoard;
+	Color[][] nextBlockBoard;
+	
 	Block block;
+	Block nextBlock;
+	
 	Color bgColor = Color.BLACK;
+	Color nextBlockBoardColor = Color.white;
 	int beforeX, beforeY;
 	
 	public Board()
@@ -28,11 +33,18 @@ public class Board
 				gameBoard[i][j] = bgColor;
 	}
 	
+	void makeNextBlock()
+	{
+		int i = (int)(Math.random()*7);
+		nextBlock = new Block(i);
+	}
+	
 	// 블럭 생성
 	void makeBlock()
 	{
 		int i = (int)(Math.random()*7);
 		block = new Block(i);
+		nextBlockBoard = new Color[4][4];
 	}
 	
 	// 게임 보드에 새로 만들어진 블럭 혹은 밑으로 내려가는 블럭을 계속 그려줌
@@ -142,10 +154,16 @@ public class Board
 			for(int j = 0; j < col; j++)
 			{
 				if(!block.isItEdge())
-					if(gameBoard[block.absolute.y + block.relative[i].y][block.absolute.x + block.relative[i].x] != Block.blockColor)
+					if(gameBoard[block.absolute.y + block.relative[0].y][block.absolute.x + block.relative[0].x] != Block.blockColor
+					&& gameBoard[block.absolute.y + block.relative[1].y][block.absolute.x + block.relative[1].x] != Block.blockColor
+					&& gameBoard[block.absolute.y + block.relative[2].y][block.absolute.x + block.relative[2].x] != Block.blockColor
+					&& gameBoard[block.absolute.y + block.relative[3].y][block.absolute.x + block.relative[3].x] != Block.blockColor)
 						block.absolute.y++;
 					else
-						return;
+						return;	
+			
+				
+				
 			}
 
 	}

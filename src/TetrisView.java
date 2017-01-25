@@ -1,3 +1,4 @@
+import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -19,16 +20,19 @@ class TetrisView extends Frame implements KeyListener
 	Board board;
 	DownThread downThread;
 	boolean startFlag = false;
+	boolean makeNextBlockTime = true;
 	
 	int size = 10;
-	int startX = 50, startY = 50;
+	int startX = 30, startY = 50;
 	
 	WinEvent w = new WinEvent();
+	
 	public TetrisView()
 	{
 		super("MyTetris");
 		board = new Board(); // 보드 최초 생성
-		setBounds(120, 120, 200, 300);
+		setBounds(120, 120, 300, 300);
+		setLayout(new BorderLayout());
 	    addKeyListener(this);
 	    setVisible(true);
 	    addWindowListener(w);
@@ -55,16 +59,22 @@ class TetrisView extends Frame implements KeyListener
 		}
 	}
 
-	/* KeyProcessing 역할
+	/* 
+	 * KeyProcessing 역할
 	 * 1) 기존 보드위에 있는 블럭 삭제 
 	 * 2) 키보드 눌러서 블럭 이동
 	 * 3) 움직여본 블럭이 맨 아래에 도달했거나 아니면 이미 다른 블럭이 있는 자리일 경우 새 블럭을 생성하고 기존 블럭을 화면에 그려줌 
-	 * 4) 현재 블럭을 화면에 그려줌
-	 * 		 
+	 * 4) 현재 블럭을 화면에 그려줌 
 	 */
-	// 라인 삭제 되고 새 블럭 추가 한 뒤 다시 연속으로 새 블럭이 추가되는 경우
 	public void KeyProcessing(int key)
 	{
+		if(makeNextBlockTime)
+		{
+			board.makeNextBlock();
+			makeNextBlockTime = false;
+		}
+			
+		
 		board.removeBlockOnBoard(); // 현재 움직이는 블럭 중 보드 위에 있는 블럭 삭제(기존 멈춰진 블럭은 그대로 냅둬야함)
 		
 		if(key == KeyEvent.VK_SPACE)
@@ -83,6 +93,8 @@ class TetrisView extends Frame implements KeyListener
 			synchronized(this) // 다른 키를 눌러서 블럭을 새로 만드는 것을 막기 위해 동기화
 			{
 				board.makeBlock(); // 새 블럭 생성	
+				board.block = board.nextBlock;
+				makeNextBlockTime = true;
 			}
 			
 		}
@@ -128,7 +140,7 @@ class TetrisView extends Frame implements KeyListener
 				y = startY + i*size; // 사각형을 그릴 시작점의 y좌표 계속 업데이트
 				bufferG.setColor(board.gameBoard[i][j]); // 업데이트된 보드판의 색깔(보드판 위에 블럭이 씌워진)로 메모리버퍼에 그려줄 색을 변경
 				bufferG.fillRect(x, y, size, size); // 업데이트된 보드판의 색깔(보드판 위에 블럭이 씌워진)로 메모리버퍼 화면에 그려줌
-			}		
+			}
 	}
 	
 	@Override
