@@ -1,10 +1,14 @@
+import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 
-public class Block implements Cloneable
+
+public class Block implements MovingBlock
 {
 	KeyEvent keyEvent;
 	private int type;
+	
+	static Color blockColor = Color.RED;
 	
 	// 블럭의 좌표값을 나타내는 포인트
 	
@@ -83,7 +87,7 @@ public class Block implements Cloneable
 			break;
 			
 		case BLOCK_SHAPE_Z:
-			System.out.println("Z");
+//			System.out.println("Z");
 			relative[0] = new Point(0, 0);
 			relative[1] = new Point(0, -1);
 			relative[2] = new Point(1, 0);
@@ -111,7 +115,8 @@ public class Block implements Cloneable
 		}
 	}
 	
-	void move(int key) // 블럭을 해당 키에 맞게 움직인다.
+	@Override
+	public void move(int key) // 블럭을 해당 키에 맞게 움직인다.
 	{
 		switch(key)
 		{
@@ -153,6 +158,10 @@ public class Block implements Cloneable
 			case KeyEvent.VK_UP:
 				backRotateBlock();
 				break;
+				
+			case KeyEvent.VK_SPACE:
+				absolute.y--;
+				break;
 		}		
 	}
 	
@@ -171,12 +180,9 @@ public class Block implements Cloneable
 			// 좌우 엣지 판별
 			if(absolute.x+relative[i].x >= Board.col || absolute.x+relative[i].x < 0)
 				return true;
-			
-				
 		}
 		
 		return false; // for문을 빠져나왔다면 edge가 아니라는 것임
-			
 	}
 
 	@Override

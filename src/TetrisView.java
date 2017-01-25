@@ -18,7 +18,7 @@ class TetrisView extends Frame implements KeyListener
 	Graphics bufferG;
 	Board board;
 	DownThread downThread;
-	boolean startFlag;
+	boolean startFlag = false;
 	
 	int size = 10;
 	int startX = 50, startY = 50;
@@ -28,7 +28,7 @@ class TetrisView extends Frame implements KeyListener
 	{
 		super("MyTetris");
 		board = new Board(); // 보드 최초 생성
-		setBounds(120, 120, 300, 500);
+		setBounds(120, 120, 200, 300);
 	    addKeyListener(this);
 	    setVisible(true);
 	    addWindowListener(w);
@@ -44,6 +44,7 @@ class TetrisView extends Frame implements KeyListener
 			if(!startFlag) // 최초로 블럭을 만드는 경우이다.
 			{
 				board.makeBlock();
+				board.addBlock();
 				System.out.println("엔터키 눌려서 쓰레드 시작!");
 				downThread.start();
 				
@@ -61,28 +62,40 @@ class TetrisView extends Frame implements KeyListener
 	 * 4) 현재 블럭을 화면에 그려줌
 	 * 		 
 	 */
-	
+	// 라인 삭제 되고 새 블럭 추가 한 뒤 다시 연속으로 새 블럭이 추가되는 경우
 	public void KeyProcessing(int key)
 	{
-//		System.out.println("KeyProcessing 시 key 값 : " + key);
 		board.removeBlockOnBoard(); // 현재 움직이는 블럭 중 보드 위에 있는 블럭 삭제(기존 멈춰진 블럭은 그대로 냅둬야함)
 		
-		board.block.move(key); // 키보드가 어떤 키가 눌렸는지에 따라 보드에 있는 블럭을 이동시킴
+		if(key == KeyEvent.VK_SPACE)
+			board.spaceMove();
+		else
+			board.block.move(key); // 키보드가 어떤 키가 눌렸는지에 따라 보드에 있는 블럭을 이동시킴
 		
 		boolean needMakeNewBlock = board.needMakeNewBlock(); // 새 블럭을 생성해야하는지 판별
 		
-		if(needMakeNewBlock) // 새블럭을 생성해야 하는 상황이라면(=기존 블럭이 있는 자리에 놓으려거나 맨 끝줄에 다달았다면)
+		// 새블럭을 생성해야 하는 상황이라면(=기존 블럭이 있는 자리에 놓으려거나 테트리스 보드의 맨 끝줄에 다달았다면)
+		if(needMakeNewBlock) 
 		{
 			board.block.restoreBlockToPreState(key); // 이동한 위치 취소
 			board.addBlock(); // 새 블럭 생성 이전에 기존블럭은 그대로 화면에 남김
-			board.makeBlock(); // 새 블럭 생성
-			System.out.println("새블럭을 생성했습니다");
+			
+			synchronized(this) // 다른 키를 눌러서 블럭을 새로 만드는 것을 막기 위해 동기화
+			{
+				board.makeBlock(); // 새 블럭 생성	
+			}
+			
 		}
 		
-		else if(board.block.isItEdge()) // 새 블럭을 생성해야 하는 상황이 아니며, 
-										// 현재 블럭이 엣지에 있다면 방금 전 눌린 키보드의 이전상태로 되돌린다.
+		// 새 블럭을 생성해야 하는 상황은 아니지만, 
+		//현재 블럭이 엣지에 있다면 방금 전 눌린 키보드의 이전상태로 되돌린다.(블럭이 화면을 나가면 안되니까)
+		else if(board.block.isItEdge()) 					
 			board.block.restoreBlockToPreState(key);
 	
+		int removeLineNum = board.checkLine(); // 삭제해야 되는 라인을 체크
+		if(removeLineNum != -1) // 위에서 체크한 라인은 전부 찬 라인이라서 라인 삭제
+			board.removeLine(removeLineNum);
+
 		board.addBlock(); // 좌 우 위 아래 움직임에 의한 블럭 혹은 새로 만든 해당 블럭을 화면에 더해줌으로서 보드 업데이트
 		
 		repaint(); // 업데이트된 보드를 다시 화면에 그려줌
@@ -93,8 +106,6 @@ class TetrisView extends Frame implements KeyListener
 	{
 		paint(g);
 	}
-	
-	// 기존에 있는 것을 어떻게 그대로 남겨놓고 새로운 것을 덧붙일까? 
 	
 	@Override
 	public void paint(Graphics g) // 화면에 그림을 그려주는 오버라이딩한 메소드
